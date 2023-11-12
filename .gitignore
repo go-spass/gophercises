@@ -17,5 +17,11 @@
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
+# Jetbrains
+.idea/
+
+# Build output
+build/
+
 # Go workspace file
 go.work
