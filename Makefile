@@ -28,19 +28,11 @@ hello: vet
 	go build -o build/hello cmd/hello/main.go
 .PHONY: hello
 
-day2: vet
-	go build -o build/day2 cmd/day2/main.go
-.PHONY: day2
+quiz: vet
+	go build -o build/quiz cmd/quiz/main.go
+.PHONY: quiz
 
-day3: vet
-	go build -o build/day3 cmd/day3/main.go
-.PHONY: day3
-
-day4: vet
-	go build -o build/day4 cmd/day4/main.go
-.PHONY: day4
-
-all: hello
+all: hello quiz
 .PHONY: all
 
 clean:
