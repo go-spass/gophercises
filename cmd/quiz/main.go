@@ -37,8 +37,7 @@ func loadQuiz(filename string) ([]problem, error) {
 	// Create the quiz
 	quiz := []problem{}
 	for _, record := range records {
-		// strings.Trim(record[1], " ")
-		quiz = append(quiz, problem{question: record[0], answer: strings.Trim(record[1], " ")})
+		quiz = append(quiz, problem{question: record[0], answer: strings.TrimSpace(record[1])})
 	}
 	return quiz, nil
 }
@@ -64,9 +63,12 @@ func main() {
 
 	// Process Command Line Flags
 	var filename string
+	var timeout int
 	flag.StringVar(&filename, "csv", defaultProblemsFile, "a csv file in the format of 'question,answer'")
+	flag.IntVar(&timeout, "timeout", 30, "the time limit for the quiz in seconds")
 	flag.Parse()
 	fmt.Printf("Using problems file: %s\n", filename)
+	fmt.Printf("Using timeout: %d\n", timeout)
 
 	// Load the quiz
 	quiz, err := loadQuiz(filename)
