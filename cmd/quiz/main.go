@@ -8,9 +8,39 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 )
 
 const defaultProblemsFile = "problems.csv"
+
+type App struct {
+	filename   string
+	duration   int
+	doneChan   chan bool
+	answerChan chan bool
+}
+
+func newApp() App {
+	app := App{
+		filename: defaultProblemsFile,
+		duration: 30,
+	}
+
+	// Process Command Line Flags
+	var filename string
+	var timeout int
+	flag.StringVar(&filename, "csv", defaultProblemsFile, "a csv file in the format of 'question,answer'")
+	flag.IntVar(&timeout, "timeout", 30, "the time limit for the quiz in seconds")
+	flag.Parse()
+	app.filename = filename
+	app.duration = timeout
+
+	// Create channels
+	app.doneChan = make(chan bool)
+	app.answerChan = make(chan bool)
+
+	return app
+}
 
 type problem struct {
 	question string
@@ -43,8 +73,7 @@ func loadQuiz(filename string) ([]problem, error) {
 }
 
 // runQuiz runs the quiz and returns the number of correct answers
-func runQuiz(quiz []problem) int {
-	numCorrect := 0
+func runQuiz(app App, quiz []problem) {
 	scanner := bufio.NewScanner(os.Stdin) // Create a scanner to read from stdin
 	for _, problem := range quiz {
 		fmt.Printf("Question: %s\n", problem.question)
@@ -52,31 +81,42 @@ func runQuiz(quiz []problem) int {
 		scanner.Scan()
 		answer := scanner.Text()
 		if answer == problem.answer {
-			numCorrect++
+			app.answerChan <- true
 		}
 	}
-	return numCorrect
+	app.doneChan <- true
 }
 
 func main() {
+	app := newApp() // Create a new app and handle command line flags
 	fmt.Println("Welcome to the quiz game!")
 
-	// Process Command Line Flags
-	var filename string
-	var timeout int
-	flag.StringVar(&filename, "csv", defaultProblemsFile, "a csv file in the format of 'question,answer'")
-	flag.IntVar(&timeout, "timeout", 30, "the time limit for the quiz in seconds")
-	flag.Parse()
-	fmt.Printf("Using problems file: %s\n", filename)
-	fmt.Printf("Using timeout: %d\n", timeout)
-
 	// Load the quiz
-	quiz, err := loadQuiz(filename)
+	quiz, err := loadQuiz(app.filename)
 	if err != nil {
 		log.Fatalf("Failed to load the quiz: %s\n", err)
 	}
 
+	numCorrect := 0
+
 	// Start the quiz
-	numCorrect := runQuiz(quiz)
-	fmt.Printf("You got %d out of %d correct\n", numCorrect, len(quiz))
+	go runQuiz(app, quiz)
+
+	// Start the timer
+	go func() {
+		time.Sleep(30 * time.Second)
+		fmt.Println("\nTimes Up!")
+		app.doneChan <- true
+	}()
+
+	// Wait for the quiz to finish or the timer to expire
+	for {
+		select {
+		case <-app.doneChan:
+			fmt.Printf("You got %d out of %d correct\n", numCorrect, len(quiz))
+			os.Exit(0)
+		case <-app.answerChan:
+			numCorrect++
+		}
+	}
 }
