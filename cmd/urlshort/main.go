@@ -2,9 +2,8 @@ package main
 
 import (
 	"fmt"
-	"net/http"
-
 	"github.com/go-spass/gophercises/internal/urlshort"
+	"net/http"
 )
 
 func main() {
@@ -17,23 +16,24 @@ func main() {
 	}
 	mapHandler := urlshort.MapHandler(pathsToUrls, mux)
 
-	fmt.Println("Starting the server on :8080")
-	var _ = http.ListenAndServe(":8080", mapHandler)
+	//fmt.Println("Starting the server on :8080")
+	//var _ = http.ListenAndServe(":8080", mapHandler)
 
 	// Build the YAMLHandler using the mapHandler as the
 	// fallback
-	//	yaml := `
-	//- path: /urlshort
-	//  url: https://github.com/gophercises/urlshort
-	//- path: /urlshort-final
-	//  url: https://github.com/gophercises/urlshort/tree/solution
-	//`
-	//	yamlHandler, err := urlshort.YAMLHandler([]byte(yaml), mapHandler)
-	//	if err != nil {
-	//		panic(err)
-	//	}
-	//	fmt.Println("Starting the server on :8080")
-	//	http.ListenAndServe(":8080", yamlHandler)
+	yaml := `
+- path: /urlshort
+  url: https://github.com/gophercises/urlshort
+- path: /urlshort-final
+  url: https://github.com/gophercises/urlshort/tree/solution
+`
+
+	yamlHandler, err := urlshort.YAMLHandler([]byte(yaml), mapHandler)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Starting the server on :8080")
+	var _ = http.ListenAndServe(":8080", yamlHandler)
 }
 
 func defaultMux() *http.ServeMux {
