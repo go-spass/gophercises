@@ -13,3 +13,10 @@ make quiz
 ```
 
 ### Exercise 2: URL Shortener
+See [README.md](./cmd/urlshort/README.md) for details
+```bash
+make urlshort
+./build/urlshort
+```
+
+

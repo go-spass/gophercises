@@ -32,7 +32,11 @@ quiz: vet
 	go build -o build/quiz cmd/quiz/main.go
 .PHONY: quiz
 
-all: hello quiz
+urlshort: vet
+	go build -o build/urlshort cmd/urlshort/main.go
+.PHONY: urlshort
+
+all: hello quiz urlshort
 .PHONY: all
 
 clean:
